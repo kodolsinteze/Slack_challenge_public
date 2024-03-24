@@ -1,0 +1,111 @@
+{% extends 'calendar/base.html' %}
+{% block content %}
+<head>
+<style>
+  table
+  {
+  border-bottom: 1px Solid Black;         
+  border-right: 1px Solid Black;         
+  border-collapse : collapse;  
+  }
+  table td
+  {    
+  border-left: 1px Solid Black;         
+  border-top: 1px Solid Black;              
+  border-bottom:none;    
+  border-right:none;
+  max-width: 150px;
+  min-width: 120px;
+  height: 190;
+  min-height: 190;
+  word-wrap: break-word;
+  }
+  table th
+  {    
+  border-left: 1px Solid Black;         
+  border-top: 1px Solid Black;              
+  border-bottom:none;    
+  border-right:none;
+  max-width: 150px;
+  min-width: 120px;
+  word-wrap: break-word;
+  }
+  .div-1 {
+        background-color: #8ab5dd;
+  }
+</style>
+</head>
+<div class="div-1">
+<h1>Daily Stand-up list</h1>
+<h2>There are {{ calendars|length }} users in AISP integrations</h2>
+
+{% if bad_boys|length > 0 %}
+<h5>Persons who didnt post a Standup today:</h5>
+<ul>
+{%for person in bad_boys%}
+<li>{{person}}</li>
+{%endfor%}
+</ul>
+{%endif%}
+
+{%if current_month != beginning_month%}
+<a
+    class="btn btn-success" 
+    href="{% url 'all_calendars'  %}{% now 'Y'%}/{{ current_month|add:'-1'}}">
+    Previous month
+</a>
+{%endif%}
+
+{%if current_month != beginning_month%}
+<a
+    class="btn btn-success" 
+    href="{% url 'refresh'  %}">
+    Refresh data
+</a>
+{%endif%}
+
+{%if current_month < current_real_year%}
+<a
+    class="btn btn-success"
+    href="{% url 'all_calendars'  %}{% now 'Y'%}/{{ current_month|add:'1' }}">
+    Next month
+</a>
+{%endif%}
+</div>
+<br>
+{% for key, value in calendars.items %}
+ <h3>{{key}}</h3>
+
+ <table class="table">
+  <thead>
+    <tr>
+      {% for date, text in value.items%}
+      <th scope="col", style="background-color:#ecd0d0">{{date|date:'j N o l'}}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for date, text in value.items%}
+      {% with domain=date|date:'l' %} 
+      {% if domain == 'Saturday' or domain == 'Sunday' %}
+      <td scope="row"> </td>
+      {%elif text.emoji == ':palm_tree:'%}
+      <td style="background-color:green", scope="row">On Vacation</td>
+      {%elif text.emoji == ':face_with_thermometer:'%}
+      <td style="background-color:rgb(26, 112, 192)", scope="row">Sick</td>
+      {%elif text.text == 'none'%}
+      <td style="background-color:#ff0000", scope="row"> </td>
+      {% else %}
+      <td scope="row">{{text.text}}</td>
+      {% endif %}
+      {% endwith %}
+      {% endfor %}
+    </tr>
+   
+  </tbody>
+</table>
+
+{% endfor %}
+{%endblock%}
+
